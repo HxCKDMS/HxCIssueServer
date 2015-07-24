@@ -1,0 +1,21 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+
+sourceCompatibility = 1.8
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5'
+    compile 'org.kohsuke:github-api:1.69'
+}
+
+jar {
+    manifest {
+        attributes("Main-Class": "HxCKDMS.HxCIssueServer.HxCIssueServer")
+        attributes("Application-Name": "HxCIssueServer")
+    }
+}
