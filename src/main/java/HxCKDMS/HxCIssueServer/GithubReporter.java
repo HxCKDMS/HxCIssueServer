@@ -58,6 +58,7 @@ public class GithubReporter extends Thread {
     }
 
     private boolean shouldUpload() throws IOException {
+        if(mod == null) return false;
         URL url = new URL("https://raw.githubusercontent.com/HxCKDMS/Version-and-Crashes/master/Versions");
         InputStream inputStream = url.openStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
