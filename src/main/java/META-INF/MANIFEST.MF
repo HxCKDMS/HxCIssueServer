@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Class-Path: gson-2.3.1.jar jackson-databind-2.2.3.jar commons-io-1.4.j
+ ar bridge-method-annotation-1.14.jar jackson-annotations-2.2.3.jar ja
+ ckson-core-2.2.3.jar commons-lang-2.6.jar github-api-1.69.jar commons
+ -codec-1.7.jar
+Main-Class: HxCKDMS.HxCIssueServer.HxCIssueServer
+
