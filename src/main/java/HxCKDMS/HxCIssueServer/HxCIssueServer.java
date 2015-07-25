@@ -63,12 +63,8 @@ public class HxCIssueServer {
         String line;
         while ((line = reader.readLine()) != null) sb.append(line).append("\n");
 
-        String crash = gson.fromJson(sb.toString(), crashSendTemplate.class).crash;
-        String mod = gson.fromJson(sb.toString(), crashSendTemplate.class).mod;
-        String title = gson.fromJson(sb.toString(), crashSendTemplate.class).title;
-        String version = gson.fromJson(sb.toString(), crashSendTemplate.class).version;
-
-        new GithubReporter(crash, mod, title, version).run();
+        crashSendTemplate receivedFile = gson.fromJson(sb.toString(), crashSendTemplate.class);
+        new GithubReporter(receivedFile.crash, receivedFile.mod, receivedFile.title, receivedFile.version).run();
     }
 
     private static void closeConnections() throws IOException{
