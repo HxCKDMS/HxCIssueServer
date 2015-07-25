@@ -9,8 +9,8 @@ repositories {
 }
 
 dependencies {
-    compile 'org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5'
     compile 'org.kohsuke:github-api:1.69'
+    compile 'com.google.code.gson:gson:2.3.1'
 }
 
 jar {

@@ -2,3 +2,4 @@
 .idea
 HxCIssueServer.iml
 build
+.gradle
