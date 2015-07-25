@@ -70,8 +70,6 @@ public class GithubReporter extends Thread {
                 break;
             }
         }
-
-        System.out.println(answer);
         return answer;
     }
 }
