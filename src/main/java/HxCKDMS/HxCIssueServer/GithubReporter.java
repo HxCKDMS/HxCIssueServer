@@ -30,7 +30,7 @@ public class GithubReporter extends Thread {
 
     private void github() throws IOException{
         GitHub github = GitHub.connectUsingOAuth(HxCIssueServer.githubAuthenticationKey);
-        GHRepository repository = github.getOrganization("HxCKDMS").getRepository("Version-and-Crashes");
+        GHRepository repository = github.getOrganization("HxCKDMS").getRepository("AutomaticCrashReports");
 
         List<GHIssue> openedIssues = repository.getIssues(GHIssueState.OPEN);
 
