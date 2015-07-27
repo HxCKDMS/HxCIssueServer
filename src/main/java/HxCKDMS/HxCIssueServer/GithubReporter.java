@@ -35,13 +35,13 @@ public class GithubReporter extends Thread {
         List<GHIssue> openedIssues = repository.getIssues(GHIssueState.OPEN);
 
         for(GHIssue issue : openedIssues){
-            if(issue.getTitle().equals(title)) {
+            if(issue.getTitle().equals("[" + mod + "] " + title)) {
                 issue.comment(pasteeeLink);
                 return;
             }
         }
 
-        GHIssueBuilder issueBuilder = repository.createIssue(title);
+        GHIssueBuilder issueBuilder = repository.createIssue("[" + mod + "] " + title);
 
         issueBuilder.label("bot");
         issueBuilder.body(pasteeeLink);
