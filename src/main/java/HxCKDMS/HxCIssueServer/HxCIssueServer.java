@@ -16,16 +16,14 @@ public class HxCIssueServer {
     private static Gson gson = new Gson();
 
     public static String githubAuthenticationKey;
-    public static String pasteeeAuthenticationKey;
 
     public static void main(String[] args) {
         if(args.length != 3){
-            System.err.println("Program doesn't accept less and more than 3 arguments [port] [github key] [pasteee key]");
+            System.err.println("Program doesn't accept less and more than 3 arguments [port] [github key]");
             System.exit(-1);
         }
         int port = Integer.parseInt(args[0]);
         githubAuthenticationKey = args[1];
-        pasteeeAuthenticationKey = args[2];
 
         try{
             serverSocket = new ServerSocket(port, 100);
