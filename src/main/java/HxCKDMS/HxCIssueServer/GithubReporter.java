@@ -9,7 +9,6 @@ public class GithubReporter extends Thread {
     private String crash;
     private String mod;
     private String title;
-    String pasteeeLink;
 
     public GithubReporter(String crash, String mod, String title) {
         this.crash = crash;
@@ -20,9 +19,7 @@ public class GithubReporter extends Thread {
     @Override
     public void run() {
         try {
-            pasteeeLink = PasteeePoster.sendCrash(crash, mod, title);
-            if(pasteeeLink != null) github();
-            else System.out.println("Pasteee link was null!");
+            github();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -30,13 +27,14 @@ public class GithubReporter extends Thread {
 
     private void github() throws IOException{
         GitHub github = GitHub.connectUsingOAuth(HxCIssueServer.githubAuthenticationKey);
-        GHRepository repository = github.getOrganization("HxCKDMS").getRepository("AutomaticCrashReports");
+        String gitLink = sendCrash(github, crash);
 
+        GHRepository repository = github.getOrganization("HxCKDMS").getRepository("AutomaticCrashReports");
         List<GHIssue> openedIssues = repository.getIssues(GHIssueState.OPEN);
 
         for(GHIssue issue : openedIssues){
             if(issue.getTitle().equals("[" + mod + "] " + title)) {
-                issue.comment(pasteeeLink);
+                issue.comment(gitLink);
                 return;
             }
         }
@@ -44,7 +42,14 @@ public class GithubReporter extends Thread {
         GHIssueBuilder issueBuilder = repository.createIssue("[" + mod + "] " + title);
 
         issueBuilder.label("bot");
-        issueBuilder.body(pasteeeLink);
+        issueBuilder.body(gitLink);
         issueBuilder.create();
+    }
+
+    public String sendCrash(GitHub github, String crash) throws IOException {
+        GHGistBuilder gistBuilder = github.createGist();
+        gistBuilder.description(crash);
+        GHGist gist = gistBuilder.create();
+        return gist.getUrl().toString();
     }
 }
