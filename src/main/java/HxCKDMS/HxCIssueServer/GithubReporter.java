@@ -27,7 +27,7 @@ public class GithubReporter extends Thread {
 
     private void github() throws IOException{
         GitHub github = GitHub.connectUsingOAuth(HxCIssueServer.githubAuthenticationKey);
-        String gitLink = sendCrash(github, crash);
+        String gitLink = sendCrash(github);
 
         GHRepository repository = github.getOrganization("HxCKDMS").getRepository("AutomaticCrashReports");
         List<GHIssue> openedIssues = repository.getIssues(GHIssueState.OPEN);
@@ -46,10 +46,11 @@ public class GithubReporter extends Thread {
         issueBuilder.create();
     }
 
-    public String sendCrash(GitHub github, String crash) throws IOException {
+    public String sendCrash(GitHub github) throws IOException {
         GHGistBuilder gistBuilder = github.createGist();
-        gistBuilder.description(crash);
+        gistBuilder.file("[" + mod + "] " + title, crash);
+
         GHGist gist = gistBuilder.create();
-        return gist.getUrl().toString();
+        return gist.getHtmlUrl().toString();
     }
 }

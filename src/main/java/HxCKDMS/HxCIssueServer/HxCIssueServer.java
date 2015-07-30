@@ -18,7 +18,7 @@ public class HxCIssueServer {
     public static String githubAuthenticationKey;
 
     public static void main(String[] args) {
-        if(args.length != 3){
+        if(args.length != 2){
             System.err.println("Program doesn't accept less and more than 3 arguments [port] [github key]");
             System.exit(-1);
         }
