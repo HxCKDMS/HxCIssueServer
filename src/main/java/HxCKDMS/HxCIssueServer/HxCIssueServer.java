@@ -40,7 +40,8 @@ public class HxCIssueServer {
                 whileReceivingCrash();
                 closeConnections();
             } catch (IOException e) {
-                System.err.print("connection lost.");
+                e.printStackTrace();
+                System.err.println("connection lost.");
             }
         }
     }
