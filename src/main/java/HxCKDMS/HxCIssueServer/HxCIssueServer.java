@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class HxCIssueServer {
     private static boolean running = true;
@@ -63,7 +64,7 @@ public class HxCIssueServer {
         while ((line = reader.readLine()) != null) sb.append(line).append("\n");
 
         crashSendTemplate receivedFile = gson.fromJson(sb.toString(), crashSendTemplate.class);
-        new GithubReporter(receivedFile.crash, receivedFile.mod, receivedFile.title).run();
+        new GithubReporter(receivedFile.crash).start();
     }
 
     private static void closeConnections() throws IOException{
@@ -72,14 +73,6 @@ public class HxCIssueServer {
     }
 
     class crashSendTemplate {
-        String crash;
-        String mod;
-        String title;
-
-        public crashSendTemplate(String crash, String mod, String title) {
-            this.crash = crash;
-            this.mod = mod;
-            this.title = title;
-        }
+        ArrayList<String> crash;
     }
 }
