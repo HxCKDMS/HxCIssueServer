@@ -66,7 +66,7 @@ public class HxCIssueServer {
         try {
             crashSendTemplate receivedFile = gson.fromJson(sb.toString(), crashSendTemplate.class);
             new GithubReporter(receivedFile.crash).start();
-        } catch (IllegalStateException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
