@@ -63,8 +63,12 @@ public class HxCIssueServer {
         String line;
         while ((line = reader.readLine()) != null) sb.append(line).append("\n");
 
-        crashSendTemplate receivedFile = gson.fromJson(sb.toString(), crashSendTemplate.class);
-        new GithubReporter(receivedFile.crash).start();
+        try {
+            crashSendTemplate receivedFile = gson.fromJson(sb.toString(), crashSendTemplate.class);
+            new GithubReporter(receivedFile.crash).start();
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void closeConnections() throws IOException{
