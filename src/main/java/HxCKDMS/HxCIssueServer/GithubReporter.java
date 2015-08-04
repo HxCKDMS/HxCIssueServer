@@ -11,36 +11,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GithubReporter extends Thread {
-    private ArrayList<String> crash;
+    private ArrayList<String> crashFile;
 
+    private String crash;
     private String mod;
     private String title;
     private String version;
     private String stacktrace;
     private String mc_ver;
 
-    public GithubReporter(ArrayList<String> crash) {
-        this.crash = crash;
+    public GithubReporter(ArrayList<String> crashFile) {
+        this.crashFile = crashFile;
     }
 
     @Override
     public void run() {
         try {
-            parseCrash(crash);
+            parseCrash();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void parseCrash(ArrayList<String> crash) throws Exception{
+    private void parseCrash() throws IOException{
         StringBuilder crashBuilder = new StringBuilder();
         StringBuilder stacktraceBuilder = new StringBuilder();
         int lineNumber = 0;
         boolean hasEncounteredEmptyAfterAt = false;
 
-        for(String line : crash) {
+        for(String line : crashFile) {
             if(++lineNumber == 7) title = line;
-            if((mod == null || mod.equals("HxCCore")) && line.contains("HxCKDMS")) {
+            if((mod == null || mod.equals("HxCCore")) && line.contains("at HxCKDMS")) {
                 String[] words;
                 if((words = line.split("\\.")).length >= 2) mod = words[1];
             }
@@ -55,24 +56,26 @@ public class GithubReporter extends Thread {
                 boolean hasEncounteredCurlyBracket = false;
                 StringBuilder versionBuilder = new StringBuilder();
                 for(Character character : chars) {
-                    if(character.equals('{')) hasEncounteredCurlyBracket = true;
-                    if(hasEncounteredCurlyBracket && character.equals('}')) return;
+                    if(hasEncounteredCurlyBracket && character.equals('}')) break;
                     if(hasEncounteredCurlyBracket) versionBuilder.append(character);
+                    if(character.equals('{')) hasEncounteredCurlyBracket = true;
                 }
                 version = versionBuilder.toString();
             }
-            if(line.contains("Minecraft Version: ")) mc_ver = line.trim().replace("Minecraft Server: ", "");
+            if(line.contains("Minecraft Version: ")) mc_ver = line.trim().replace("Minecraft Version: ", "");
             crashBuilder.append(line).append("\n");
         }
 
         stacktrace = stacktraceBuilder.toString();
-        if(checkMCVersion())github(crashBuilder.toString());
+        crash = crashBuilder.toString();
+
+        if(checkMCVersion())github();
         else System.out.println("Mod version is outdated.");
     }
 
-    private void github(String crash) throws Exception{
+    private void github() throws IOException{
         GitHub github = GitHub.connectUsingOAuth(HxCIssueServer.githubAuthenticationKey);
-        String gitLink = sendCrash(github, crash);
+        String gitLink = sendCrash(github);
 
         GHRepository repository = github.getOrganization("HxCKDMS").getRepository("AutomaticCrashReports");
         List<GHIssue> openedIssues = repository.getIssues(GHIssueState.OPEN);
@@ -91,16 +94,18 @@ public class GithubReporter extends Thread {
         issueBuilder.create();
     }
 
-    private String sendCrash(GitHub github, String crash) throws Exception {
+    private String sendCrash(GitHub github) throws IOException {
         GHGistBuilder gistBuilder = github.createGist();
-        gistBuilder.file("[" + mc_ver + "][" + mod + "] " + title, crash);
+        gistBuilder.file("[" + mc_ver + "][" + mod + "] ", crash);
 
         GHGist gist = gistBuilder.create();
         return gist.getHtmlUrl().toString();
     }
 
     private boolean checkMCVersion() throws IOException{
-        URL url = new URL("https://raw.githubusercontent.com/HxCKDMS/HxCLib/master/HxCLib.txt");
+        int modVersion = Integer.parseInt(version.replace(".", ""));
+
+        URL url = new URL("https://raw.githubusercontent.com/HxCKDMS/HxCLib/master/HxCVersions.txt");
         InputStream inputStream = url.openStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
@@ -108,7 +113,6 @@ public class GithubReporter extends Thread {
         while((line = reader.readLine()) != null) {
             if(line.contains(mod) && line.contains(mc_ver)) {
                 int currentVersion = Integer.parseInt(line.replace(mod, "").replace(mc_ver, "").replace("-", "").replace(":", "").replace(".", ""));
-                int modVersion = Integer.parseInt(version.replace(".", ""));
                 if(modVersion >= currentVersion) return true;
             }
         }

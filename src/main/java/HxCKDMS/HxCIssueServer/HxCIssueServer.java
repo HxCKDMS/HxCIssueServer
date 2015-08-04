@@ -20,7 +20,7 @@ public class HxCIssueServer {
 
     public static void main(String[] args) {
         if(args.length != 2){
-            System.err.println("Program doesn't accept less and more than 3 arguments [port] [github key]");
+            System.err.println("Program doesn't accept less and more than 2 arguments [port] [github key]");
             System.exit(-1);
         }
         int port = Integer.parseInt(args[0]);
@@ -74,5 +74,9 @@ public class HxCIssueServer {
 
     class crashSendTemplate {
         ArrayList<String> crash;
+
+        public crashSendTemplate(ArrayList<String> crash) {
+            this.crash = crash;
+        }
     }
 }
