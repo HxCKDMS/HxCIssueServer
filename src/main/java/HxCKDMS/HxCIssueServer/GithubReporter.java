@@ -51,7 +51,7 @@ public class GithubReporter extends Thread {
                 stacktraceBuilder.append(line).append("\n");
             }
 
-            if(mod != null && line.contains(mod)) {
+            if(mod != null && line.contains(mod) && !line.contains("Asm")) {
                 char[] chars = line.toCharArray();
                 boolean hasEncounteredCurlyBracket = false;
                 StringBuilder versionBuilder = new StringBuilder();
@@ -103,6 +103,10 @@ public class GithubReporter extends Thread {
     }
 
     private boolean checkMCVersion() throws IOException{
+        if (version.equals("")) {
+            System.out.println("was unable to read the mod version.");
+            return false;
+        }
         int modVersion = Integer.parseInt(version.replace(".", ""));
 
         URL url = new URL("https://raw.githubusercontent.com/HxCKDMS/HxCLib/master/HxCVersions.txt");

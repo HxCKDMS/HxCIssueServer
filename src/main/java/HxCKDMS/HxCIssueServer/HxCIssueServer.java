@@ -67,7 +67,7 @@ public class HxCIssueServer {
             crashSendTemplate receivedFile = gson.fromJson(sb.toString(), crashSendTemplate.class);
             new GithubReporter(receivedFile.crash).start();
         } catch (Exception e) {
-            e.printStackTrace();
+            if(!e.getMessage().contains("BEGIN_ARRAY")) e.printStackTrace();
         }
     }
 
