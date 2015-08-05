@@ -68,6 +68,7 @@ public class HxCIssueServer {
             new GithubReporter(receivedFile.crash).start();
         } catch (Exception e) {
             if(!e.getMessage().contains("BEGIN_ARRAY")) e.printStackTrace();
+            else System.out.println("Old reporter!");
         }
     }
 
