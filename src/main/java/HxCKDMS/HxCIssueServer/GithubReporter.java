@@ -70,7 +70,7 @@ public class GithubReporter extends Thread {
         crash = crashBuilder.toString();
 
         if(checkMCVersion())github();
-        else System.out.println("Mod version is outdated.");
+        else System.out.println("Mod version is outdated. version: " + version + ", mod: " + mod);
     }
 
     private void github() throws IOException{
