@@ -107,7 +107,7 @@ public class GithubReporter extends Thread {
             System.out.println("was unable to read the mod version.");
             return false;
         }
-        int modVersion = Integer.parseInt(version.replace(".", ""));
+        int modVersion = Integer.parseInt(version.replace(".", "").replace("1710-", "").replace("18-", ""));
 
         URL url = new URL("https://raw.githubusercontent.com/HxCKDMS/HxCLib/master/HxCVersions.txt");
         InputStream inputStream = url.openStream();
