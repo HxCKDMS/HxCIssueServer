@@ -3,7 +3,7 @@ package HxCKDMS.HxCIssueServer.Server;
 import java.io.IOException;
 
 public class ThreadServerWatcher extends Thread {
-    private long counter = 0;
+    private int counter = 0;
 
     public ThreadServerWatcher(String name) {
         setName(name);
@@ -12,10 +12,16 @@ public class ThreadServerWatcher extends Thread {
     @Override
     public void run() {
         while(HxCIssueServer.running) {
-            if(HxCIssueServer.isReceiving) ++counter;
-            else if(!HxCIssueServer.isReceiving) counter = 0;
+            if(HxCIssueServer.isReceiving) counter++;
+            else if(counter != 0 && !HxCIssueServer.isReceiving) counter = 0;
+            try {
+                sleep(1000L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
-            if(counter == 30e9) {
+            if(counter == 30) {
+                counter = 0;
                 try {
                     HxCIssueServer.closeConnections();
                 } catch (IOException e) {
