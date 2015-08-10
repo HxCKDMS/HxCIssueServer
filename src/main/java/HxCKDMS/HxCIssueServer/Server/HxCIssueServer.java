@@ -1,5 +1,9 @@
-package HxCKDMS.HxCIssueServer;
+package HxCKDMS.HxCIssueServer.Server;
 
+import HxCKDMS.HxCIssueServer.GitHub.GitHubReporter;
+import HxCKDMS.HxCIssueServer.Logging.Logger;
+import HxCKDMS.HxCIssueServer.Streams.CustomSysErrStream;
+import HxCKDMS.HxCIssueServer.Streams.CustomSysOutStream;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
@@ -10,17 +14,24 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 public class HxCIssueServer {
-    private static boolean running = true;
+    public static Logger logger = new Logger("HxCIssueServer Logger", "HxCIssueBot_log");
+
+    static volatile boolean running = true;
     private static ServerSocket serverSocket;
     private static Socket connection;
     private static BufferedReader reader;
     private static Gson gson = new Gson();
 
+    static volatile boolean isReceiving = false;
+
     public static String githubAuthenticationKey;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        System.setOut(new CustomSysOutStream(System.out));
+        System.setErr(new CustomSysErrStream(System.err));
+
         if(args.length != 2){
-            System.err.println("Program doesn't accept less and more than 2 arguments [port] [github key]");
+            logger.severe("Program doesn't accept less and more than 2 arguments [port] [github key]");
             System.exit(-1);
         }
         int port = Integer.parseInt(args[0]);
@@ -29,33 +40,36 @@ public class HxCIssueServer {
         try{
             serverSocket = new ServerSocket(port, 100);
         } catch (IOException e) {
-            System.err.println("Failed to bind to port: " + port + ".");
+            logger.severe("Failed to bind to port: " + port + ".");
             running = false;
             System.exit(1);
         }
 
+        new ThreadServerWatcher(ThreadServerWatcher.class.getSimpleName()).start();
+
         while(running) {
             try {
+                isReceiving = false;
                 waitForConnection();
+                isReceiving = true;
                 setupInputStream();
                 whileReceivingCrash();
                 closeConnections();
             } catch (IOException e) {
-                e.printStackTrace();
-                System.err.println("connection lost.");
+                logger.warning("connection lost.", e);
             }
         }
     }
 
     private static void waitForConnection() throws IOException{
-        System.out.println("waiting...");
+        logger.info("waiting...");
         connection = serverSocket.accept();
-        System.out.println("Connected to: " + connection.getInetAddress().getHostName());
+        logger.info("Connected to: " + connection.getInetAddress().getHostName());
     }
 
     private static void setupInputStream() throws IOException{
         reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        System.out.println("setting up streams done");
+        logger.info("setting up streams done");
     }
 
     private static void whileReceivingCrash() throws IOException{
@@ -65,16 +79,17 @@ public class HxCIssueServer {
 
         try {
             crashSendTemplate receivedFile = gson.fromJson(sb.toString(), crashSendTemplate.class);
-            new GithubReporter(receivedFile.crash).start();
+            new GitHubReporter(receivedFile.crash, GitHubReporter.class.getSimpleName()).start();
         } catch (Exception e) {
             if(!e.getMessage().contains("BEGIN_ARRAY")) e.printStackTrace();
-            else System.out.println("Old reporter!");
+            else logger.warning("Old reporter!");
         }
     }
 
-    private static void closeConnections() throws IOException{
+    static void closeConnections() throws IOException{
         reader.close();
         connection.close();
+        logger.info("Closed all incoming connections.");
     }
 
     class crashSendTemplate {

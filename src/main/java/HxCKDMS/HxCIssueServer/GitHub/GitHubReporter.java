@@ -1,5 +1,6 @@
-package HxCKDMS.HxCIssueServer;
+package HxCKDMS.HxCIssueServer.GitHub;
 
+import HxCKDMS.HxCIssueServer.Server.HxCIssueServer;
 import org.kohsuke.github.*;
 
 import java.io.BufferedReader;
@@ -10,7 +11,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GithubReporter extends Thread {
+public class GitHubReporter extends Thread {
     private ArrayList<String> crashFile;
 
     private String crash;
@@ -20,8 +21,9 @@ public class GithubReporter extends Thread {
     private String stacktrace;
     private String mc_ver;
 
-    public GithubReporter(ArrayList<String> crashFile) {
+    public GitHubReporter(ArrayList<String> crashFile, String name) {
         this.crashFile = crashFile;
+        setName(name);
     }
 
     @Override
@@ -70,7 +72,7 @@ public class GithubReporter extends Thread {
         crash = crashBuilder.toString();
 
         if(checkMCVersion())github();
-        else System.out.println("Mod version is outdated. version: " + version + ", mod: " + mod);
+        else HxCIssueServer.logger.warning("Mod version is outdated. version: " + version + ", mod: " + mod + ", minecraft version: " + mc_ver);
     }
 
     private void github() throws IOException{
@@ -91,7 +93,7 @@ public class GithubReporter extends Thread {
 
         issueBuilder.label("bot");
         issueBuilder.body(gitLink);
-        issueBuilder.create();
+        //issueBuilder.create();
     }
 
     private String sendCrash(GitHub github) throws IOException {
@@ -104,7 +106,7 @@ public class GithubReporter extends Thread {
 
     private boolean checkMCVersion() throws IOException{
         if (version.equals("")) {
-            System.out.println("was unable to read the mod version.");
+            HxCIssueServer.logger.warning("was unable to read the mod version.");
             return false;
         }
         int modVersion = Integer.parseInt(version.replace(".", "").replace("1710-", "").replace("18-", ""));
@@ -115,8 +117,9 @@ public class GithubReporter extends Thread {
 
         String line;
         while((line = reader.readLine()) != null) {
-            if(line.contains(mod) && line.contains(mc_ver)) {
-                int currentVersion = Integer.parseInt(line.replace(mod, "").replace(mc_ver, "").replace("-", "").replace(":", "").replace(".", ""));
+            if(line.split(":")[0].contains(mod) && line.split(":")[1].split("\\-")[0].contains(mc_ver)) {
+                int currentVersion = Integer.parseInt(line.split(":")[1].split("\\-")[1].replace(".", ""));
+                HxCIssueServer.logger.info("Mod: " + mod + " crash version: " + modVersion + " HxCLib version: " + currentVersion);
                 if(modVersion >= currentVersion) return true;
             }
         }

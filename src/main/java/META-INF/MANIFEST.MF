@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
-Class-Path: jackson-annotations-2.2.3.jar commons-codec-1.7.jar gson-2
- .3.1.jar commons-lang-2.6.jar github-api-1.69.jar bridge-method-annot
- ation-1.14.jar jackson-core-2.2.3.jar jackson-databind-2.2.3.jar comm
- ons-io-1.4.jar
-Main-Class: HxCKDMS.HxCIssueServer.HxCIssueServer
+Class-Path: commons-codec-1.7.jar gson-2.3.1.jar commons-io-1.4.jar br
+ idge-method-annotation-1.14.jar commons-lang-2.6.jar jackson-databind
+ -2.2.3.jar github-api-1.69.jar jackson-core-2.2.3.jar jackson-annotat
+ ions-2.2.3.jar
+Main-Class: HxCKDMS.HxCIssueServer.Server.HxCIssueServer
 
