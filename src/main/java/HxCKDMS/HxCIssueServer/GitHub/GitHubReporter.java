@@ -93,7 +93,7 @@ public class GitHubReporter extends Thread {
 
         issueBuilder.label("bot");
         issueBuilder.body(gitLink);
-        //issueBuilder.create();
+        issueBuilder.create();
     }
 
     private String sendCrash(GitHub github) throws IOException {
