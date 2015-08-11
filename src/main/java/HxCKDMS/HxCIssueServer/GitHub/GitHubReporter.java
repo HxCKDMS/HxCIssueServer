@@ -40,9 +40,18 @@ public class GitHubReporter extends Thread {
         StringBuilder stacktraceBuilder = new StringBuilder();
         int lineNumber = 0;
         boolean hasEncounteredEmptyAfterAt = false;
+        boolean hasTitle = false;
+        String prevLine = "";
 
         for(String line : crashFile) {
-            if(++lineNumber == 7) title = line;
+            if(!hasTitle) {
+                if(line.contains("at")) {
+                    title = prevLine;
+                    hasTitle = true;
+                }
+                prevLine = line;
+            }
+
             if((mod == null || mod.equals("HxCCore")) && line.contains("at HxCKDMS")) {
                 String[] words;
                 if((words = line.split("\\.")).length >= 2) mod = words[1];
