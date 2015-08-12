@@ -40,18 +40,14 @@ public class GitHubReporter extends Thread {
         StringBuilder stacktraceBuilder = new StringBuilder();
         int lineNumber = 0;
         boolean hasEncounteredEmptyAfterAt = false;
-        boolean hasTitle = false;
         String prevLine = "";
 
         for(String line : crashFile) {
-            if(!hasTitle) {
-                if(line.contains("at")) {
-                    title = prevLine;
-                    hasTitle = true;
-                }
-                prevLine = line;
+            if(line.contains("Duplicate enchantment id!")) {
+                HxCIssueServer.logger.warning("This is a duplicate enchantment id, this will not be reported!");
+                return;
             }
-
+            if(title.equals("") && line.contains("at")) title = prevLine;
             if((mod == null || mod.equals("HxCCore")) && line.contains("at HxCKDMS")) {
                 String[] words;
                 if((words = line.split("\\.")).length >= 2) mod = words[1];
@@ -75,6 +71,7 @@ public class GitHubReporter extends Thread {
             }
             if(line.contains("Minecraft Version: ")) mc_ver = line.trim().replace("Minecraft Version: ", "");
             crashBuilder.append(line).append("\n");
+            prevLine = line;
         }
 
         stacktrace = stacktraceBuilder.toString();

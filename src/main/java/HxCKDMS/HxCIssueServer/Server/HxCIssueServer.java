@@ -40,7 +40,7 @@ public class HxCIssueServer {
         try{
             serverSocket = new ServerSocket(port, 100);
         } catch (IOException e) {
-            logger.severe("Failed to bind to port: " + port + ".");
+            logger.severe("Failed to bind to port: " + port + ".", e);
             running = false;
             System.exit(1);
         }
