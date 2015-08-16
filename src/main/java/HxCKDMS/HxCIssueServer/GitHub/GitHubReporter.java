@@ -43,35 +43,39 @@ public class GitHubReporter extends Thread {
         String prevLine = "";
 
         for(String line : crashFile) {
-            if(line.contains("Duplicate enchantment id!")) {
-                HxCIssueServer.logger.warning("This is a duplicate enchantment id, this will not be reported!");
-                return;
-            }
-            if(title.equals("") && line.contains("at")) title = prevLine;
-            if((mod == null || mod.equals("HxCCore")) && line.contains("at HxCKDMS")) {
-                String[] words;
-                if((words = line.split("\\.")).length >= 2) mod = words[1];
-            }
-
-            if(lineNumber >= 7 && line.contains("at") && !hasEncounteredEmptyAfterAt) {
-                if(!line.contains("at")) hasEncounteredEmptyAfterAt = true;
-                stacktraceBuilder.append(line).append("\n");
-            }
-
-            if(mod != null && line.contains(mod) && !line.contains("Asm")) {
-                char[] chars = line.toCharArray();
-                boolean hasEncounteredCurlyBracket = false;
-                StringBuilder versionBuilder = new StringBuilder();
-                for(Character character : chars) {
-                    if(hasEncounteredCurlyBracket && character.equals('}')) break;
-                    if(hasEncounteredCurlyBracket) versionBuilder.append(character);
-                    if(character.equals('{')) hasEncounteredCurlyBracket = true;
+            try {
+                if(line.contains("Duplicate enchantment id!")) {
+                    HxCIssueServer.logger.warning("This is a duplicate enchantment id, this will not be reported!");
+                    return;
                 }
-                version = versionBuilder.toString();
+                if(title.equals("") && line.contains("at")) title = prevLine;
+                if((mod == null || mod.equals("HxCCore")) && line.contains("at HxCKDMS")) {
+                    String[] words;
+                    if((words = line.split("\\.")).length >= 2) mod = words[1];
+                }
+
+                if(lineNumber >= 7 && line.contains("at") && !hasEncounteredEmptyAfterAt) {
+                    if(!line.contains("at")) hasEncounteredEmptyAfterAt = true;
+                    stacktraceBuilder.append(line).append("\n");
+                }
+
+                if(mod != null && line.contains(mod) && !line.contains("Asm")) {
+                    char[] chars = line.toCharArray();
+                    boolean hasEncounteredCurlyBracket = false;
+                    StringBuilder versionBuilder = new StringBuilder();
+                    for(Character character : chars) {
+                        if(hasEncounteredCurlyBracket && character.equals('}')) break;
+                        if(hasEncounteredCurlyBracket) versionBuilder.append(character);
+                        if(character.equals('{')) hasEncounteredCurlyBracket = true;
+                    }
+                    version = versionBuilder.toString();
+                }
+                if(line.contains("Minecraft Version: ")) mc_ver = line.trim().replace("Minecraft Version: ", "");
+                crashBuilder.append(line).append("\n");
+                prevLine = line;
+            } catch (Exception e) {
+                HxCIssueServer.logger.warning("an error happened whilst parsing the crash: ", e);
             }
-            if(line.contains("Minecraft Version: ")) mc_ver = line.trim().replace("Minecraft Version: ", "");
-            crashBuilder.append(line).append("\n");
-            prevLine = line;
         }
 
         stacktrace = stacktraceBuilder.toString();
