@@ -48,7 +48,7 @@ public class GitHubReporter extends Thread {
                     HxCIssueServer.logger.warning("This is a duplicate enchantment id, this will not be reported!");
                     return;
                 }
-                if(title.equals("") && line.contains("at")) title = prevLine;
+                if((title == null || title.equals("")) && line.contains("at")) title = prevLine;
                 if((mod == null || mod.equals("HxCCore")) && line.contains("at HxCKDMS")) {
                     String[] words;
                     if((words = line.split("\\.")).length >= 2) mod = words[1];
