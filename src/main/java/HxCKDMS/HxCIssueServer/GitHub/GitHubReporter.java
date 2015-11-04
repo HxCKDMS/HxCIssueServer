@@ -48,6 +48,14 @@ public class GitHubReporter extends Thread {
                     HxCIssueServer.logger.warning("This is a duplicate enchantment id, this will not be reported!");
                     return;
                 }
+                if(line.contains("maximum id range exceeded.")) {
+                    HxCIssueServer.logger.warning("Id range exceeded not reporting!");
+                    return;
+                }
+                if(line.contains("Java Version: 1.7") || line.contains("Java Version: 1.6")) {
+                    HxCIssueServer.logger.warning("Unsupported Java Version!");
+                    return;
+                }
                 if((mod == null || mod.equals("HxCCore")) && line.contains("at HxCKDMS")) {
                     String[] words;
                     if((words = line.split("\\.")).length >= 2) mod = words[1];
@@ -71,7 +79,8 @@ public class GitHubReporter extends Thread {
                 }
                 if(line.contains("Minecraft Version: ")) mc_ver = line.trim().replace("Minecraft Version: ", "");
                 crashBuilder.append(line).append("\n");
-                if((title == null || title.equals("")) && line.contains("at")) title = prevLine;
+                if(!prevLine.startsWith("Description:") && !prevLine.startsWith("Time:") && !prevLine.equalsIgnoreCase("---- Minecraft Crash Report ----") && (title == null || title.equals("")) && line.contains("at"))
+                    title = prevLine;
                 prevLine = line;
             } catch (Exception e) {
                 HxCIssueServer.logger.warning("an error happened whilst parsing the crash: ", e);
@@ -86,6 +95,7 @@ public class GitHubReporter extends Thread {
     }
 
     private void github() throws IOException{
+        HxCIssueServer.logger.info("Reporting issue : " + "[" + mc_ver + "][" + mod + "] " + title);
         GitHub github = GitHub.connectUsingOAuth(HxCIssueServer.githubAuthenticationKey);
         String gitLink = sendCrash(github);
 
