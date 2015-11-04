@@ -1,6 +1,8 @@
 # Created by .ignore support plugin (hsz.mobi)
 .idea
-HxCIssueServer.iml
 build
 .gradle
+*.iml
+*.ipr
+*.iws
 classes
