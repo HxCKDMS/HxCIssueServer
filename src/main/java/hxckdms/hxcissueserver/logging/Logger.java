@@ -1,4 +1,4 @@
-package HxCKDMS.HxCIssueServer.Logging;
+package hxckdms.hxcissueserver.logging;
 
 import java.io.IOException;
 import java.util.logging.ConsoleHandler;

@@ -1,6 +1,6 @@
-package HxCKDMS.HxCIssueServer.Streams;
+package hxckdms.hxcissueserver.streams;
 
-import HxCKDMS.HxCIssueServer.Server.HxCIssueServer;
+import hxckdms.hxcissueserver.server.HxCIssueServer;
 
 import java.io.OutputStream;
 import java.io.PrintStream;

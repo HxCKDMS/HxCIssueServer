@@ -1,17 +1,17 @@
-package HxCKDMS.HxCIssueServer.Server;
+package hxckdms.hxcissueserver.server;
 
-import HxCKDMS.HxCIssueServer.GitHub.GitHubReporter;
-import HxCKDMS.HxCIssueServer.Logging.Logger;
-import HxCKDMS.HxCIssueServer.Streams.CustomSysErrStream;
-import HxCKDMS.HxCIssueServer.Streams.CustomSysOutStream;
-import com.google.gson.Gson;
+import hxckdms.hxccore.crash.CrashSerializer;
+import hxckdms.hxcissueserver.github.GitHubReporter;
+import hxckdms.hxcissueserver.logging.Logger;
+import hxckdms.hxcissueserver.streams.CustomSysErrStream;
+import hxckdms.hxcissueserver.streams.CustomSysOutStream;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class HxCIssueServer {
     public static Logger logger = new Logger("HxCIssueServer Logger", "HxCIssueBot_log");
@@ -19,14 +19,13 @@ public class HxCIssueServer {
     static volatile boolean running = true;
     private static ServerSocket serverSocket;
     private static Socket connection;
-    private static BufferedReader reader;
-    private static Gson gson = new Gson();
+    private static ObjectInputStream input;
 
     static volatile boolean isReceiving = false;
 
     public static String githubAuthenticationKey;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
         System.setOut(new CustomSysOutStream(System.out));
         System.setErr(new CustomSysErrStream(System.err));
 
@@ -45,7 +44,7 @@ public class HxCIssueServer {
             System.exit(1);
         }
 
-        new ThreadServerWatcher(ThreadServerWatcher.class.getSimpleName()).start();
+
 
         while(running) {
             try {
@@ -56,6 +55,7 @@ public class HxCIssueServer {
                 whileReceivingCrash();
                 closeConnections();
             } catch (IOException e) {
+                e.printStackTrace();
                 logger.warning("connection lost.", e);
             }
         }
@@ -68,35 +68,19 @@ public class HxCIssueServer {
     }
 
     private static void setupInputStream() throws IOException{
-        reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        input = new ObjectInputStream(connection.getInputStream());
         logger.info("setting up streams done");
     }
 
-    private static void whileReceivingCrash() throws IOException{
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) sb.append(line).append("\n");
+    private static void whileReceivingCrash() throws IOException, ClassNotFoundException {
+        CrashSerializer crash = (CrashSerializer) input.readObject();
 
-        try {
-            crashSendTemplate receivedFile = gson.fromJson(sb.toString(), crashSendTemplate.class);
-            new GitHubReporter(receivedFile.crash, GitHubReporter.class.getSimpleName()).start();
-        } catch (Exception e) {
-            if(!e.getMessage().contains("BEGIN_ARRAY")) e.printStackTrace();
-            else logger.warning("Old reporter!");
-        }
+        new GitHubReporter(new ArrayList<>(Arrays.asList(crash.crashString.split("\n"))), GitHubReporter.class.getSimpleName()).start();
     }
 
-    static void closeConnections() throws IOException{
-        reader.close();
+    private static void closeConnections() throws IOException{
+        input.close();
         connection.close();
         logger.info("Closed all incoming connections.");
-    }
-
-    class crashSendTemplate {
-        ArrayList<String> crash;
-
-        public crashSendTemplate(ArrayList<String> crash) {
-            this.crash = crash;
-        }
     }
 }

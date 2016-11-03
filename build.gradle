@@ -10,7 +10,6 @@ repositories {
 
 dependencies {
     compile 'org.kohsuke:github-api:1.69'
-    compile 'com.google.code.gson:gson:2.3.1'
 }
 
 jar {

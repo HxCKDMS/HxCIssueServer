@@ -1,6 +1,6 @@
-package HxCKDMS.HxCIssueServer.GitHub;
+package hxckdms.hxcissueserver.github;
 
-import HxCKDMS.HxCIssueServer.Server.HxCIssueServer;
+import hxckdms.hxcissueserver.server.HxCIssueServer;
 import org.kohsuke.github.*;
 
 import java.io.BufferedReader;
@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class GitHubReporter extends Thread {
@@ -37,37 +38,30 @@ public class GitHubReporter extends Thread {
 
     private void parseCrash() throws IOException{
         StringBuilder crashBuilder = new StringBuilder();
-        StringBuilder stacktraceBuilder = new StringBuilder();
-        int lineNumber = 0;
-        boolean hasEncounteredEmptyAfterAt = false;
         String prevLine = "";
 
         for(String line : crashFile) {
             try {
-                if(line.contains("Duplicate enchantment id!")) {
+                if(line.toLowerCase().contains("duplicate enchantment id!")) {
                     HxCIssueServer.logger.warning("This is a duplicate enchantment id, this will not be reported!");
                     return;
                 }
-                if(line.contains("maximum id range exceeded.")) {
+                if(line.toLowerCase().contains("maximum id range exceeded.")) {
                     HxCIssueServer.logger.warning("Id range exceeded not reporting!");
                     return;
                 }
-                if(line.contains("Java Version: 1.7") || line.contains("Java Version: 1.6")) {
+                if(line.toLowerCase().contains("java version: 1.7") || line.toLowerCase().contains("java version: 1.6")) {
                     HxCIssueServer.logger.warning("Unsupported Java Version!");
                     return;
                 }
-                if((mod == null || mod.equals("HxCCore")) && line.contains("at HxCKDMS")) {
+                if((mod == null || mod.equalsIgnoreCase("hxccore")) && line.toLowerCase().contains("at hxckdms")) {
                     String[] words;
                     if((words = line.split("\\.")).length >= 2) mod = words[1];
                 }
 
-                if(lineNumber >= 7 && line.contains("at") && !hasEncounteredEmptyAfterAt) {
-                    if(!line.contains("at")) hasEncounteredEmptyAfterAt = true;
-                    stacktraceBuilder.append(line).append("\n");
-                }
-
-                if(mod != null && line.contains(mod) && !line.contains("Asm")) {
+                if(mod != null && line.contains(mod) && !line.contains("asm")) {
                     char[] chars = line.toCharArray();
+                    System.out.println(Arrays.toString(chars));
                     boolean hasEncounteredCurlyBracket = false;
                     StringBuilder versionBuilder = new StringBuilder();
                     for(Character character : chars) {
@@ -87,10 +81,10 @@ public class GitHubReporter extends Thread {
             }
         }
 
-        stacktrace = stacktraceBuilder.toString();
+        stacktrace = "";
         crash = crashBuilder.toString();
 
-        if(checkMCVersion())github();
+        if(checkMCVersion()) github();
         else HxCIssueServer.logger.warning("Mod version is outdated. version: " + version + ", mod: " + mod + ", minecraft version: " + mc_ver);
     }
 
@@ -125,11 +119,11 @@ public class GitHubReporter extends Thread {
     }
 
     private boolean checkMCVersion() throws IOException{
-        if (version.equals("")) {
+        if ("".equalsIgnoreCase(version)) {
             HxCIssueServer.logger.warning("was unable to read the mod version.");
             return false;
         }
-        int modVersion = Integer.parseInt(version.replace(".", "").replace("1710-", "").replace("18-", ""));
+        int modVersion = Integer.parseInt(version.replace(".", "").replace("1710-", "").replace("18-", "").replace("1102", ""));
 
         URL url = new URL("https://raw.githubusercontent.com/HxCKDMS/HxCLib/master/HxCVersions.txt");
         InputStream inputStream = url.openStream();
@@ -143,6 +137,6 @@ public class GitHubReporter extends Thread {
                 if(modVersion >= currentVersion) return true;
             }
         }
-        return  false;
+        return false;
     }
 }
